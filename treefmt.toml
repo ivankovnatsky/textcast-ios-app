@@ -1,0 +1,13 @@
+[formatter.swift]
+command = "swiftformat"
+options = ["--swiftversion", "6"]
+includes = ["*.swift"]
+
+[formatter.prettier]
+command = "prettier"
+options = ["--write"]
+includes = ["*.md", "*.json", "*.yml", "*.yaml"]
+
+[formatter.nix]
+command = "nixfmt"
+includes = ["*.nix"]
