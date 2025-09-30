@@ -1,0 +1,17 @@
+name: textcast-ios-app
+startup_window: 0
+root: <%= ENV['PWD'] %>
+
+windows:
+  - editor:
+      layout: main-vertical
+      panes:
+        - nvim
+  - shell:
+      layout: main-vertical
+      panes:
+        - ls -lah
+  - claude:
+      layout: main-vertical
+      panes:
+        - claude
