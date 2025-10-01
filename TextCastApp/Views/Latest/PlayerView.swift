@@ -72,7 +72,7 @@ struct PlayerView: View {
                         }
 
                         // Main controls
-                        VStack(spacing: 32) {
+                        VStack(spacing: 64) {
                             // Primary controls (top row)
                             HStack(spacing: 40) {
                                 // Skip backward
