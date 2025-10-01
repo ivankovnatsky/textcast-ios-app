@@ -7,8 +7,8 @@
       "hidden" : false,
       "layers" : [
         {
-          "image-name" : "player-icon 2.svg",
-          "name" : "player-icon 2"
+          "image-name" : "Original.svg",
+          "name" : "Original"
         }
       ],
       "shadow" : {
