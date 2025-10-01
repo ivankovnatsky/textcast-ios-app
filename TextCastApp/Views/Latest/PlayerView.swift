@@ -74,7 +74,7 @@ struct PlayerView: View {
                         // Main controls
                         VStack(spacing: 64) {
                             // Primary controls (top row)
-                            HStack(spacing: 40) {
+                            HStack(spacing: 60) {
                                 // Skip backward
                                 Button {
                                     audioPlayer.skipBackward()
