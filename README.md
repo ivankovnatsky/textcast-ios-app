@@ -240,9 +240,9 @@ TextCastApp/
 │   └── TextCastApp.swift              # Main app, AuthenticationState, login flow
 ├── Views/
 │   ├── ContentView.swift              # Root view with tabs
-│   ├── Queue/
-│   │   ├── QueueView.swift            # Latest episodes list
-│   │   ├── QueueItemRow.swift         # Queue item cell
+│   ├── Latest/
+│   │   ├── LatestView.swift           # Latest episodes list
+│   │   ├── QueueItemRow.swift         # Latest item cell
 │   │   └── PlayerView.swift           # Full-screen player
 │   └── Settings/
 │       ├── SettingsView.swift         # Settings tab

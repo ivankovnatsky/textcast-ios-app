@@ -22,7 +22,7 @@ struct MainTabView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             TabView {
-                QueueView()
+                LatestView()
                     .environmentObject(playerState)
                     .tabItem {
                         Label("Latest", systemImage: "list.bullet")

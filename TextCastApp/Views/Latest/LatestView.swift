@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct QueueView: View {
+struct LatestView: View {
     @StateObject private var viewModel = QueueViewModel()
     @EnvironmentObject var authState: AuthenticationState
     @EnvironmentObject var playerState: PlayerState
@@ -163,11 +163,11 @@ struct QueueItemRow: View {
     }
 }
 
-#Preview("Queue View") {
-    QueueView()
+#Preview("Latest View") {
+    LatestView()
 }
 
-#Preview("Queue Item Row") {
+#Preview("Latest Item Row") {
     List {
         QueueItemRow(item: QueueItem.preview)
         QueueItemRow(item: QueueItem.preview2)
