@@ -121,4 +121,26 @@ class PlayerState: ObservableObject {
         audioPlayer.pause()
         currentItem = nil
     }
+
+    /// Remove an item from the play queue (e.g., when deleted from library)
+    func removeFromQueue(itemId: String) {
+        // Remove from queue
+        playQueue.removeAll { $0.id == itemId }
+
+        // If currently playing item was deleted, stop playback
+        if currentItem?.id == itemId {
+            audioPlayer.pause()
+            currentItem = nil
+
+            // Try to play next item if available
+            if currentQueueIndex < playQueue.count {
+                playCurrentItem()
+            }
+        } else if let currentIndex = playQueue.firstIndex(where: { $0.id == currentItem?.id }) {
+            // Update current index if items before it were removed
+            currentQueueIndex = currentIndex
+        }
+
+        AppLogger.shared.log("Removed item \(itemId) from play queue", level: .info)
+    }
 }

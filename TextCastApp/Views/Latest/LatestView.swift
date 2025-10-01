@@ -42,7 +42,7 @@ struct LatestView: View {
                                 }
                                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                     Button(role: .destructive) {
-                                        viewModel.deleteItem(item)
+                                        viewModel.deleteItem(item, playerState: playerState)
                                     } label: {
                                         Label("Delete", systemImage: "trash")
                                     }
@@ -79,9 +79,9 @@ struct LatestView: View {
                                     Divider()
 
                                     Button(role: .destructive) {
-                                        viewModel.deleteItem(item)
+                                        viewModel.deleteItem(item, playerState: playerState)
                                     } label: {
-                                        Label("Remove from Queue", systemImage: "trash")
+                                        Label("Delete from Library", systemImage: "trash")
                                     }
                                 }
                         }

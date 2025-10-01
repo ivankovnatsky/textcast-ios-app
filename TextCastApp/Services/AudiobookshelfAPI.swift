@@ -404,4 +404,95 @@ actor AudiobookshelfAPI {
 
         await AppLogger.shared.log("Synced progress: \(currentTime)s / \(duration)s", level: .info)
     }
+
+    // MARK: - User Progress Management
+
+    /// Delete podcast episode from library (permanent deletion)
+    /// DELETE /api/podcasts/:id/episode/:episodeId
+    func deleteEpisode(libraryItemId: String, episodeId: String) async throws {
+        guard let token = accessToken else {
+            throw AudiobookshelfError.unauthorized
+        }
+
+        let endpoint = "\(baseURL)/api/podcasts/\(libraryItemId)/episode/\(episodeId)"
+        guard let url = URL(string: endpoint) else {
+            throw AudiobookshelfError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AudiobookshelfError.invalidResponse
+        }
+
+        guard (200 ... 299).contains(httpResponse.statusCode) else {
+            throw AudiobookshelfError.serverError(statusCode: httpResponse.statusCode, message: "Failed to delete episode")
+        }
+
+        await MainActor.run {
+            AppLogger.shared.log("Deleted episode \(episodeId) from library", level: .info)
+        }
+    }
+
+    /// Update media progress (can mark as finished or reset progress)
+    /// PATCH /api/me/progress/:libraryItemId/:episodeId?
+    func updateMediaProgress(libraryItemId: String, episodeId: String?, isFinished: Bool, currentTime: Double = 0, duration: Double? = nil) async throws {
+        guard let token = accessToken else {
+            throw AudiobookshelfError.unauthorized
+        }
+
+        var endpoint = "\(baseURL)/api/me/progress/\(libraryItemId)"
+        if let episodeId = episodeId {
+            endpoint += "/\(episodeId)"
+        }
+
+        guard let url = URL(string: endpoint) else {
+            throw AudiobookshelfError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        var payload: [String: Any] = [
+            "isFinished": isFinished,
+            "currentTime": currentTime,
+        ]
+
+        if let duration = duration {
+            payload["duration"] = duration
+            payload["progress"] = duration > 0 ? currentTime / duration : 0
+        }
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AudiobookshelfError.invalidResponse
+        }
+
+        guard (200 ... 299).contains(httpResponse.statusCode) else {
+            throw AudiobookshelfError.serverError(statusCode: httpResponse.statusCode, message: "Failed to update media progress")
+        }
+
+        await MainActor.run {
+            AppLogger.shared.log("Updated progress for \(libraryItemId)\(episodeId != nil ? "/\(episodeId!)" : ""): isFinished=\(isFinished), currentTime=\(currentTime)", level: .info)
+        }
+    }
+
+    /// Mark episode as finished
+    func markAsFinished(libraryItemId: String, episodeId: String, duration: Double) async throws {
+        try await updateMediaProgress(libraryItemId: libraryItemId, episodeId: episodeId, isFinished: true, currentTime: duration, duration: duration)
+    }
+
+    /// Reset episode progress to beginning
+    func resetProgress(libraryItemId: String, episodeId: String, duration: Double) async throws {
+        try await updateMediaProgress(libraryItemId: libraryItemId, episodeId: episodeId, isFinished: false, currentTime: 0, duration: duration)
+    }
 }

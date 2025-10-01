@@ -16,7 +16,10 @@ class QueueViewModel: ObservableObject {
     }
 
     func loadQueue(progressMap: [String: UserDetailsResponse.UserMediaProgress] = [:]) async {
-        guard !isLoading else { return }
+        guard !isLoading else {
+            AppLogger.shared.log("Already loading, skipping duplicate request", level: .debug)
+            return
+        }
         guard let apiClient else {
             errorMessage = "Not authenticated"
             return
@@ -75,24 +78,78 @@ class QueueViewModel: ObservableObject {
         selectedItem = item
     }
 
-    func deleteItem(_ item: QueueItem) {
-        // TODO: Call API to remove item from server queue
+    func deleteItem(_ item: QueueItem, playerState: PlayerState) {
+        // Optimistically remove from UI immediately
         withAnimation {
             items.removeAll { $0.id == item.id }
+        }
+
+        // Remove from play queue if currently in queue
+        playerState.removeFromQueue(itemId: item.id)
+
+        Task { @MainActor in
+            do {
+                guard let apiClient else {
+                    AppLogger.shared.log("API client not available", level: .error)
+                    return
+                }
+
+                // Parse composite ID (format: "libraryItemId/episodeId")
+                let components = item.id.split(separator: "/")
+                guard components.count == 2 else {
+                    AppLogger.shared.log("Invalid item ID format: \(item.id)", level: .error)
+                    return
+                }
+
+                let libraryItemId = String(components[0])
+                let episodeId = String(components[1])
+
+                // Permanently delete episode from library
+                try await apiClient.deleteEpisode(libraryItemId: libraryItemId, episodeId: episodeId)
+
+                AppLogger.shared.log("Deleted '\(item.title)' from library", level: .info)
+            } catch {
+                AppLogger.shared.log("Failed to delete item: \(error)", level: .error)
+                // Consider reloading the queue on error to sync with server state
+            }
         }
     }
 
     func markAsFinished(_ item: QueueItem) {
-        // TODO: Call API to mark item as finished on server
-        // For now, just remove from queue
+        // Optimistically remove from UI immediately
         withAnimation {
             items.removeAll { $0.id == item.id }
         }
-        AppLogger.shared.log("Marked '\(item.title)' as finished", level: .info)
+
+        Task { @MainActor in
+            do {
+                guard let apiClient else {
+                    AppLogger.shared.log("API client not available", level: .error)
+                    return
+                }
+
+                // Parse composite ID (format: "libraryItemId/episodeId")
+                let components = item.id.split(separator: "/")
+                guard components.count == 2 else {
+                    AppLogger.shared.log("Invalid item ID format: \(item.id)", level: .error)
+                    return
+                }
+
+                let libraryItemId = String(components[0])
+                let episodeId = String(components[1])
+
+                // Mark as finished on server
+                try await apiClient.markAsFinished(libraryItemId: libraryItemId, episodeId: episodeId, duration: item.totalDuration)
+
+                AppLogger.shared.log("Marked '\(item.title)' as finished", level: .info)
+            } catch {
+                AppLogger.shared.log("Failed to mark item as finished: \(error)", level: .error)
+            }
+        }
     }
 
     func restartProgress(_ item: QueueItem) {
-        // TODO: Call API to reset progress on server
+        // Optimistically update UI immediately
         guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
 
         withAnimation {
@@ -106,6 +163,31 @@ class QueueViewModel: ObservableObject {
                 totalDuration: item.totalDuration
             )
         }
-        AppLogger.shared.log("Restarted '\(item.title)'", level: .info)
+
+        Task { @MainActor in
+            do {
+                guard let apiClient else {
+                    AppLogger.shared.log("API client not available", level: .error)
+                    return
+                }
+
+                // Parse composite ID (format: "libraryItemId/episodeId")
+                let components = item.id.split(separator: "/")
+                guard components.count == 2 else {
+                    AppLogger.shared.log("Invalid item ID format: \(item.id)", level: .error)
+                    return
+                }
+
+                let libraryItemId = String(components[0])
+                let episodeId = String(components[1])
+
+                // Reset progress on server
+                try await apiClient.resetProgress(libraryItemId: libraryItemId, episodeId: episodeId, duration: item.totalDuration)
+
+                AppLogger.shared.log("Restarted '\(item.title)'", level: .info)
+            } catch {
+                AppLogger.shared.log("Failed to restart progress: \(error)", level: .error)
+            }
+        }
     }
 }
