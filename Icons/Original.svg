@@ -1,0 +1,8 @@
+<svg width="1536" height="1536" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Player icon - Play button -->
+  <circle cx="256" cy="256" r="120" fill="#007AFF"/>
+  
+  <!-- Play triangle with rounded corners -->
+  <path d="M 226 216 Q 226 206 232 210 L 320 252 Q 326 256 320 260 L 232 302 Q 226 306 226 296 Z" 
+        fill="white"/>
+</svg>

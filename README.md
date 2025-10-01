@@ -179,6 +179,27 @@ The app will automatically save your credentials for future launches.
 - **Clear** - Remove all logs
 - Shows API calls, playback events, errors, and progress syncs
 
+## App Icon
+
+The app uses a simple play button icon with 6 variants for different iOS appearance modes:
+
+![App Icon](TextCastApp/Assets.xcassets/AppIcon.appiconset/Default-iOS-Default-1024x1024@1x.png)
+
+### Icon Creation Process
+
+The current app icon was created as follows:
+
+1. **Generated SVG with Claude AI**:
+
+2. **Exported with Icon Composer**:
+   - Imported the 1024x1024px PNG into Icon Composer
+   - Generated all 6 iOS variants under Icons/IconComposer
+
+3. **Added to Xcode**:
+   - Opened `TextCastApp.xcodeproj` in Xcode
+   - Navigated to `Assets.xcassets` → `AppIcon`
+   - Dragged and dropped the exported PNG files, used only default, dark, tinted
+
 ## Technology Stack
 
 - **Language**: Swift 6
