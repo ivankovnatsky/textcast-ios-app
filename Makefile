@@ -31,9 +31,10 @@ launch: ## Launch the app on simulator
 run: build install launch ## Build, install, and launch the app
 	@echo "✓ App is running"
 
-relaunch: ## Relaunch already installed app (no rebuild)
+relaunch: build install ## Rebuild, install, and relaunch the app
 	@xcrun simctl terminate $(SIMULATOR_ID) $(BUNDLE_ID) 2>/dev/null || true
 	@xcrun simctl launch $(SIMULATOR_ID) $(BUNDLE_ID)
+	@echo "✓ App relaunched"
 
 clean: ## Clean build artifacts
 	@xcodebuild -scheme $(SCHEME) clean
