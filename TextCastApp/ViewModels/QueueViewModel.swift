@@ -45,24 +45,24 @@ class QueueViewModel: ObservableObject {
             items = episodes.map { $0.toQueueItem(baseURL: baseURL, progressMap: progressMap) }
 
             // Debug: Log the IDs and progress
-            await AppLogger.shared.log("Loaded \(items.count) episodes", level: .info)
+            AppLogger.shared.log("Loaded \(items.count) episodes", level: .info)
             if let firstItem = items.first {
-                await AppLogger.shared.log("First item ID: \(firstItem.id), title: \(firstItem.title), progress: \(firstItem.progress)", level: .info)
+                AppLogger.shared.log("First item ID: \(firstItem.id), title: \(firstItem.title), progress: \(firstItem.progress)", level: .info)
             }
 
         } catch let error as AudiobookshelfError {
             errorMessage = error.localizedDescription
-            await AppLogger.shared.log("Failed to load latest (AudiobookshelfError): \(error)", level: .error)
+            AppLogger.shared.log("Failed to load latest (AudiobookshelfError): \(error)", level: .error)
         } catch {
             // Ignore cancellation errors (happens when refreshing while already loading)
             let nsError = error as NSError
             if nsError.domain == NSURLErrorDomain, nsError.code == NSURLErrorCancelled {
-                await AppLogger.shared.log("Load cancelled (user refreshed)", level: .info)
+                AppLogger.shared.log("Load cancelled (user refreshed)", level: .info)
                 return
             }
 
             errorMessage = "Failed to load latest: \(error.localizedDescription)"
-            await AppLogger.shared.log("Failed to load latest: \(error)", level: .error)
+            AppLogger.shared.log("Failed to load latest: \(error)", level: .error)
         }
     }
 
@@ -71,9 +71,7 @@ class QueueViewModel: ObservableObject {
     }
 
     func selectItem(_ item: QueueItem) {
-        Task {
-            await AppLogger.shared.log("selectItem called with id: \(item.id), title: \(item.title)", level: .info)
-        }
+        AppLogger.shared.log("selectItem called with id: \(item.id), title: \(item.title)", level: .info)
         selectedItem = item
     }
 
@@ -90,9 +88,7 @@ class QueueViewModel: ObservableObject {
         withAnimation {
             items.removeAll { $0.id == item.id }
         }
-        Task {
-            await AppLogger.shared.log("Marked '\(item.title)' as finished", level: .info)
-        }
+        AppLogger.shared.log("Marked '\(item.title)' as finished", level: .info)
     }
 
     func restartProgress(_ item: QueueItem) {
@@ -110,8 +106,6 @@ class QueueViewModel: ObservableObject {
                 totalDuration: item.totalDuration
             )
         }
-        Task {
-            await AppLogger.shared.log("Restarted '\(item.title)'", level: .info)
-        }
+        AppLogger.shared.log("Restarted '\(item.title)'", level: .info)
     }
 }

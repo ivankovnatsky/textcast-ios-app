@@ -1,12 +1,12 @@
-import Foundation
+@preconcurrency import Foundation
 
 // MARK: - Login Response
 
-struct LoginResponse: Codable {
+nonisolated struct LoginResponse: Codable, Sendable {
     let user: User
     let userDefaultLibraryId: String?
 
-    struct User: Codable {
+    struct User: Codable, Sendable {
         let id: String
         let username: String
         let email: String?
@@ -17,7 +17,7 @@ struct LoginResponse: Codable {
         let createdAt: Int64
         let permissions: Permissions
 
-        struct Permissions: Codable {
+        struct Permissions: Codable, Sendable {
             let download: Bool
             let update: Bool
             let delete: Bool
@@ -31,14 +31,14 @@ struct LoginResponse: Codable {
 
 // MARK: - User Details Response (GET /api/me)
 
-struct UserDetailsResponse: Codable {
+nonisolated struct UserDetailsResponse: Codable, Sendable {
     let id: String
     let username: String
     let type: String
     let mediaProgress: [UserMediaProgress]?
     let bookmarks: [UserBookmark]?
 
-    struct UserMediaProgress: Codable {
+    struct UserMediaProgress: Codable, Sendable {
         let id: String
         let libraryItemId: String
         let episodeId: String?
@@ -51,7 +51,7 @@ struct UserDetailsResponse: Codable {
         let updatedAt: Int64?
     }
 
-    struct UserBookmark: Codable {
+    struct UserBookmark: Codable, Sendable {
         let id: String
         let libraryItemId: String
         let title: String?
@@ -62,11 +62,11 @@ struct UserDetailsResponse: Codable {
 
 // MARK: - Libraries Response
 
-struct LibrariesResponse: Codable {
+nonisolated struct LibrariesResponse: Codable, Sendable {
     let libraries: [Library]
 }
 
-struct Library: Codable, Identifiable {
+struct Library: Codable, Identifiable, Sendable {
     let id: String
     let name: String
     let mediaType: String // "book" or "podcast"
@@ -76,7 +76,7 @@ struct Library: Codable, Identifiable {
 
 // MARK: - Media Progress
 
-struct MediaProgress: Codable {
+struct MediaProgress: Codable, Sendable {
     let id: String?
     let currentTime: Double?
     let isFinished: Bool?
@@ -87,13 +87,13 @@ struct MediaProgress: Codable {
 
 // MARK: - Recent Episodes Response
 
-struct RecentEpisodesResponse: Codable {
+nonisolated struct RecentEpisodesResponse: Codable, Sendable {
     let episodes: [PodcastEpisodeExpanded]
     let limit: Int?
     let page: Int?
 }
 
-struct PodcastEpisodeExpanded: Codable, Identifiable {
+struct PodcastEpisodeExpanded: Codable, Identifiable, Sendable {
     let id: String
     let libraryItemId: String? // Top-level field, not nested
     let title: String?
@@ -106,20 +106,20 @@ struct PodcastEpisodeExpanded: Codable, Identifiable {
     let audioFile: AudioFile?
     let mediaProgress: MediaProgress? // Progress information
 
-    struct PodcastMinimal: Codable {
+    struct PodcastMinimal: Codable, Sendable {
         let metadata: PodcastMetadata?
 
-        struct PodcastMetadata: Codable {
+        struct PodcastMetadata: Codable, Sendable {
             let title: String?
             let author: String?
         }
     }
 
-    struct AudioFile: Codable {
+    struct AudioFile: Codable, Sendable {
         let ino: String
         let metadata: AudioMetadata?
 
-        struct AudioMetadata: Codable {
+        struct AudioMetadata: Codable, Sendable {
             let filename: String?
             let ext: String?
             let path: String?
@@ -134,11 +134,11 @@ struct PodcastEpisodeExpanded: Codable, Identifiable {
 
 // MARK: - Items In Progress Response
 
-struct ItemsInProgressResponse: Codable {
+nonisolated struct ItemsInProgressResponse: Codable, Sendable {
     let libraryItems: [LibraryItem]
 }
 
-struct LibraryItem: Codable, Identifiable {
+struct LibraryItem: Codable, Identifiable, Sendable {
     let id: String
     let libraryId: String
     let folderId: String?
@@ -154,14 +154,14 @@ struct LibraryItem: Codable, Identifiable {
     let progressLastUpdate: Int64?
     let recentEpisode: PodcastEpisode?
 
-    struct Media: Codable {
+    struct Media: Codable, Sendable {
         let metadata: Metadata
         let coverPath: String?
         let tags: [String]?
         let duration: Double?
         let size: Int64?
 
-        struct Metadata: Codable {
+        struct Metadata: Codable, Sendable {
             let title: String?
             let author: String?
             let authorName: String?
@@ -174,7 +174,7 @@ struct LibraryItem: Codable, Identifiable {
             let series: [Series]?
             let coverPath: String?
 
-            struct Series: Codable {
+            struct Series: Codable, Sendable {
                 let id: String
                 let name: String
                 let sequence: String?
@@ -182,7 +182,7 @@ struct LibraryItem: Codable, Identifiable {
         }
     }
 
-    struct PodcastEpisode: Codable {
+    struct PodcastEpisode: Codable, Sendable {
         let id: String
         let title: String?
         let subtitle: String?
@@ -208,24 +208,23 @@ extension PodcastEpisodeExpanded {
             compositeId = "\(libraryItemId)/\(id)"
         } else {
             compositeId = id
-            Task { @MainActor in
-                await AppLogger.shared.log("Creating QueueItem: no libraryItemId, using episodeId=\(id) as compositeId", level: .warning)
-            }
+            #if DEBUG
+            print("⚠️ Creating QueueItem: no libraryItemId, using episodeId=\(id) as compositeId")
+            #endif
         }
 
         // Look up progress from the progressMap using the composite ID
-        let userProgress = progressMap[compositeId]
         let totalDuration = duration ?? 0
-        let currentTime: TimeInterval = userProgress?.currentTime ?? 0
-        let progress: Double = userProgress?.progress ?? 0
+        let currentTime: TimeInterval = progressMap[compositeId]?.currentTime ?? 0
+        let progress: Double = progressMap[compositeId]?.progress ?? 0
 
-        Task { @MainActor in
-            if let userProgress {
-                await AppLogger.shared.log("Episode \(compositeId): found progress \(progress), currentTime \(currentTime)", level: .debug)
-            } else {
-                await AppLogger.shared.log("Episode \(compositeId): no progress found in map", level: .debug)
-            }
+        #if DEBUG
+        if progressMap[compositeId] != nil {
+            print("🐛 Episode \(compositeId): found progress \(progress), currentTime \(currentTime)")
+        } else {
+            print("🐛 Episode \(compositeId): no progress found in map")
         }
+        #endif
 
         return QueueItem(
             id: compositeId,

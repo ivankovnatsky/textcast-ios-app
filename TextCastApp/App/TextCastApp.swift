@@ -55,13 +55,11 @@ class AuthenticationState: ObservableObject {
                 progressMap[key] = progress
             }
 
-            await MainActor.run {
-                self.mediaProgressMap = progressMap
-            }
+            self.mediaProgressMap = progressMap
 
-            await AppLogger.shared.log("Refreshed user progress: \(progressMap.count) items", level: .info)
+            AppLogger.shared.log("Refreshed user progress: \(progressMap.count) items", level: .info)
         } catch {
-            await AppLogger.shared.log("Failed to refresh user progress: \(error)", level: .error)
+            AppLogger.shared.log("Failed to refresh user progress: \(error)", level: .error)
         }
     }
 
@@ -168,7 +166,7 @@ class AuthenticationState: ObservableObject {
         let api = AudiobookshelfAPI(baseURL: baseURL)
 
         do {
-            let response = try await api.login(username: username, password: password)
+            _ = try await api.login(username: username, password: password)
             // Success - return the API client with this URL
             return (api, baseURL)
         } catch {
@@ -182,7 +180,7 @@ class AuthenticationState: ObservableObject {
                 )
 
                 let httpAPI = AudiobookshelfAPI(baseURL: httpURL)
-                let response = try await httpAPI.login(username: username, password: password)
+                _ = try await httpAPI.login(username: username, password: password)
                 // Success with http - return this API client
                 return (httpAPI, httpURL)
             } else {

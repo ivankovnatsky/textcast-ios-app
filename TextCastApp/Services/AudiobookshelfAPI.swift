@@ -1,5 +1,5 @@
 import Foundation
-import UIKit
+@preconcurrency import UIKit
 
 /// API client for Audiobookshelf server
 /// Documentation: See AUDIOBOOKSHELF_API.md
@@ -46,14 +46,10 @@ actor AudiobookshelfAPI {
             throw AudiobookshelfError.serverError(statusCode: httpResponse.statusCode, message: message)
         }
 
-        do {
-            let loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
-            // Store the access token for subsequent requests
-            accessToken = loginResponse.user.token
-            return loginResponse
-        } catch {
-            throw AudiobookshelfError.decodingError(error)
-        }
+        let loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
+        // Store the access token for subsequent requests
+        accessToken = loginResponse.user.token
+        return loginResponse
     }
 
     /// Set access token manually (e.g., from storage)
@@ -102,14 +98,9 @@ actor AudiobookshelfAPI {
             throw AudiobookshelfError.serverError(statusCode: httpResponse.statusCode, message: message)
         }
 
-        do {
-            let userDetails = try JSONDecoder().decode(UserDetailsResponse.self, from: data)
-            await AppLogger.shared.log("Fetched user details: \(userDetails.mediaProgress?.count ?? 0) progress items", level: .info)
-            return userDetails
-        } catch {
-            await AppLogger.shared.log("Failed to decode user details: \(error)", level: .error)
-            throw AudiobookshelfError.decodingError(error)
-        }
+        let userDetails = try JSONDecoder().decode(UserDetailsResponse.self, from: data)
+        await AppLogger.shared.log("Fetched user details: \(userDetails.mediaProgress?.count ?? 0) progress items", level: .info)
+        return userDetails
     }
 
     /// Get items in progress for the current user
@@ -146,12 +137,8 @@ actor AudiobookshelfAPI {
             throw AudiobookshelfError.serverError(statusCode: httpResponse.statusCode, message: message)
         }
 
-        do {
-            let response = try JSONDecoder().decode(ItemsInProgressResponse.self, from: data)
-            return response.libraryItems
-        } catch {
-            throw AudiobookshelfError.decodingError(error)
-        }
+        let itemsResponse = try JSONDecoder().decode(ItemsInProgressResponse.self, from: data)
+        return itemsResponse.libraryItems
     }
 
     // MARK: - Library Endpoints
@@ -185,12 +172,8 @@ actor AudiobookshelfAPI {
             throw AudiobookshelfError.serverError(statusCode: httpResponse.statusCode, message: message)
         }
 
-        do {
-            let response = try JSONDecoder().decode(LibrariesResponse.self, from: data)
-            return response.libraries
-        } catch {
-            throw AudiobookshelfError.decodingError(error)
-        }
+        let librariesResponse = try JSONDecoder().decode(LibrariesResponse.self, from: data)
+        return librariesResponse.libraries
     }
 
     /// Get recent episodes from a podcast library
@@ -227,24 +210,19 @@ actor AudiobookshelfAPI {
             throw AudiobookshelfError.serverError(statusCode: httpResponse.statusCode, message: message)
         }
 
-        do {
-            // Log the raw JSON response for debugging
-            if let jsonString = String(data: data, encoding: .utf8) {
-                await AppLogger.shared.log("Recent episodes raw response: \(jsonString.prefix(500))", level: .debug)
-            }
-
-            let response = try JSONDecoder().decode(RecentEpisodesResponse.self, from: data)
-
-            // Log progress info for first episode
-            if let firstEpisode = response.episodes.first {
-                await AppLogger.shared.log("First episode: id=\(firstEpisode.id), title=\(firstEpisode.title ?? "nil"), progress=\(firstEpisode.mediaProgress?.progress ?? -1), currentTime=\(firstEpisode.mediaProgress?.currentTime ?? -1)", level: .debug)
-            }
-
-            return response.episodes
-        } catch {
-            await AppLogger.shared.log("Failed to decode recent episodes: \(error)", level: .error)
-            throw AudiobookshelfError.decodingError(error)
+        // Log the raw JSON response for debugging
+        if let jsonString = String(data: data, encoding: .utf8) {
+            await AppLogger.shared.log("Recent episodes raw response: \(jsonString.prefix(500))", level: .debug)
         }
+
+        let episodesResponse = try JSONDecoder().decode(RecentEpisodesResponse.self, from: data)
+
+        // Log progress info for first episode
+        if let firstEpisode = episodesResponse.episodes.first {
+            await AppLogger.shared.log("First episode: id=\(firstEpisode.id), title=\(firstEpisode.title ?? "nil"), progress=\(firstEpisode.mediaProgress?.progress ?? -1), currentTime=\(firstEpisode.mediaProgress?.currentTime ?? -1)", level: .debug)
+        }
+
+        return episodesResponse.episodes
     }
 
     // MARK: - Item Endpoints
@@ -259,7 +237,7 @@ actor AudiobookshelfAPI {
         }
 
         // Check if this is a composite ID for podcast episode (format: "libraryItemId/episodeId")
-        let (libraryItemId, episodeId) = parseItemId(itemId)
+        let (libraryItemId, episodeId) = await parseItemId(itemId)
 
         // Build the endpoint (baseURL already has trailing slash trimmed)
         let endpoint = if let episodeId {
@@ -284,12 +262,15 @@ actor AudiobookshelfAPI {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
             // Send device info matching the official app structure
+            let (deviceId, deviceModel) = await MainActor.run {
+                (UIDevice.current.identifierForVendor?.uuidString ?? "unknown", UIDevice.current.model)
+            }
             let deviceInfo: [String: Any] = [
                 "deviceInfo": [
-                    "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "unknown",
+                    "deviceId": deviceId,
                     "clientName": "TextCast iOS",
                     "manufacturer": "Apple",
-                    "model": UIDevice.current.model,
+                    "model": deviceModel,
                 ],
                 "forceDirectPlay": true,
                 "forceTranscode": false,
@@ -341,25 +322,19 @@ actor AudiobookshelfAPI {
     }
 
     /// Parse item ID which can be either "id" or "libraryItemId/episodeId"
-    private func parseItemId(_ itemId: String) -> (libraryItemId: String, episodeId: String?) {
-        Task { @MainActor in
-            await AppLogger.shared.log("parseItemId called with: \(itemId)", level: .debug)
-        }
+    private func parseItemId(_ itemId: String) async -> (libraryItemId: String, episodeId: String?) {
+        await AppLogger.shared.log("parseItemId called with: \(itemId)", level: .debug)
 
         if itemId.contains("/") {
             let components = itemId.split(separator: "/", maxSplits: 1)
             if components.count == 2 {
                 let result = (String(components[0]), String(components[1]))
-                Task { @MainActor in
-                    await AppLogger.shared.log("parseItemId result: libraryItemId=\(result.0), episodeId=\(result.1 ?? "nil")", level: .debug)
-                }
+                await AppLogger.shared.log("parseItemId result: libraryItemId=\(result.0), episodeId=\(result.1)", level: .debug)
                 return result
             }
         }
 
-        Task { @MainActor in
-            await AppLogger.shared.log("parseItemId: no '/' found, returning libraryItemId=\(itemId), episodeId=nil", level: .debug)
-        }
+        await AppLogger.shared.log("parseItemId: no '/' found, returning libraryItemId=\(itemId), episodeId=nil", level: .debug)
         return (itemId, nil)
     }
 

@@ -41,9 +41,7 @@ class AudioPlayerService: ObservableObject {
             try audioSession.setCategory(.playback, mode: .spokenAudio)
             try audioSession.setActive(true)
         } catch {
-            Task {
-                await AppLogger.shared.log("Failed to set up audio session: \(error)", level: .error)
-            }
+            AppLogger.shared.log("Failed to set up audio session: \(error)", level: .error)
         }
     }
 
@@ -53,7 +51,7 @@ class AudioPlayerService: ObservableObject {
         // Play command
         commandCenter.playCommand.addTarget { [weak self] _ in
             Task { @MainActor in
-                await self?.play()
+                self?.play()
             }
             return .success
         }
@@ -61,7 +59,7 @@ class AudioPlayerService: ObservableObject {
         // Pause command
         commandCenter.pauseCommand.addTarget { [weak self] _ in
             Task { @MainActor in
-                await self?.pause()
+                self?.pause()
             }
             return .success
         }
@@ -70,7 +68,7 @@ class AudioPlayerService: ObservableObject {
         commandCenter.skipForwardCommand.preferredIntervals = [15]
         commandCenter.skipForwardCommand.addTarget { [weak self] _ in
             Task { @MainActor in
-                await self?.skipForward()
+                self?.skipForward()
             }
             return .success
         }
@@ -79,7 +77,7 @@ class AudioPlayerService: ObservableObject {
         commandCenter.skipBackwardCommand.preferredIntervals = [15]
         commandCenter.skipBackwardCommand.addTarget { [weak self] _ in
             Task { @MainActor in
-                await self?.skipBackward()
+                self?.skipBackward()
             }
             return .success
         }
@@ -125,8 +123,8 @@ class AudioPlayerService: ObservableObject {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 
-    func load(url: URL) async {
-        await AppLogger.shared.log("AudioPlayerService loading URL: \(url)", level: .info)
+    func load(url: URL) {
+        AppLogger.shared.log("AudioPlayerService loading URL: \(url)", level: .info)
 
         // Reset finish flag
         didFinishPlaying = false
@@ -146,35 +144,29 @@ class AudioPlayerService: ObservableObject {
         // Observe when item finishes playing
         NotificationCenter.default.publisher(for: .AVPlayerItemDidPlayToEndTime, object: playerItem)
             .sink { [weak self] _ in
-                Task { @MainActor in
-                    await AppLogger.shared.log("Episode finished playing", level: .info)
-                    self?.didFinishPlaying = true
-                    self?.isPlaying = false
-                }
+                guard let self else { return }
+                AppLogger.shared.log("Episode finished playing", level: .info)
+                self.didFinishPlaying = true
+                self.isPlaying = false
             }
             .store(in: &cancellables)
 
         // Observe player item status
         player?.currentItem?.publisher(for: \.status)
             .sink { [weak self] status in
-                Task { @MainActor in
-                    await AppLogger.shared.log("Player status changed: \(status.rawValue)", level: .info)
-                }
+                guard let self else { return }
+                AppLogger.shared.log("Player status changed: \(status.rawValue)", level: .info)
                 if status == .readyToPlay {
-                    Task { @MainActor in
-                        self?.updateDuration()
-                        await AppLogger.shared.log("Duration ready: \(self?.duration ?? 0)s", level: .info)
-                    }
+                    self.updateDuration()
+                    AppLogger.shared.log("Duration ready: \(self.duration)s", level: .info)
                 } else if status == .failed {
-                    if let error = self?.player?.currentItem?.error {
-                        Task { @MainActor in
-                            await AppLogger.shared.log("Player failed: \(error.localizedDescription)", level: .error)
-                            // Log underlying error details
-                            let nsError = error as NSError
-                            await AppLogger.shared.log("Error domain: \(nsError.domain), code: \(nsError.code)", level: .error)
-                            if let underlyingError = nsError.userInfo[NSUnderlyingErrorKey] as? NSError {
-                                await AppLogger.shared.log("Underlying error: \(underlyingError.localizedDescription)", level: .error)
-                            }
+                    if let error = self.player?.currentItem?.error {
+                        AppLogger.shared.log("Player failed: \(error.localizedDescription)", level: .error)
+                        // Log underlying error details
+                        let nsError = error as NSError
+                        AppLogger.shared.log("Error domain: \(nsError.domain), code: \(nsError.code)", level: .error)
+                        if let underlyingError = nsError.userInfo[NSUnderlyingErrorKey] as? NSError {
+                            AppLogger.shared.log("Underlying error: \(underlyingError.localizedDescription)", level: .error)
                         }
                     }
                 }
@@ -184,61 +176,58 @@ class AudioPlayerService: ObservableObject {
         // Add periodic time observer
         let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            Task { @MainActor in
-                self?.currentTime = time.seconds
-                // Also update duration in case it wasn't available initially
-                if let duration = self?.player?.currentItem?.duration.seconds,
-                   duration.isFinite,
-                   self?.duration == 0
-                {
-                    self?.duration = duration
-                }
+            guard let self else { return }
+            self.currentTime = time.seconds
+            // Also update duration in case it wasn't available initially
+            if let duration = self.player?.currentItem?.duration.seconds,
+               duration.isFinite,
+               self.duration == 0
+            {
+                self.duration = duration
+            }
 
-                // Update now playing info with current time
-                self?.updateNowPlayingTime()
+            // Update now playing info with current time
+            self.updateNowPlayingTime()
 
-                // Sync progress periodically if playing
-                if let self, self.isPlaying {
-                    let now = Date()
-                    if now.timeIntervalSince(self.lastProgressSync) >= self.progressSyncInterval {
-                        self.lastProgressSync = now
-                        Task {
-                            await self.syncProgress()
-                        }
+            // Sync progress periodically if playing
+            if self.isPlaying {
+                let now = Date()
+                if now.timeIntervalSince(self.lastProgressSync) >= self.progressSyncInterval {
+                    self.lastProgressSync = now
+                    Task {
+                        await self.syncProgress()
                     }
                 }
             }
         }
 
-        await AppLogger.shared.log("Player loaded, waiting for ready state...", level: .info)
+        AppLogger.shared.log("Player loaded, waiting for ready state...", level: .info)
     }
 
     func togglePlayPause() {
         if isPlaying {
-            Task {
-                await pause()
-            }
+            pause()
         } else {
-            Task {
-                await play()
-            }
+            play()
         }
     }
 
-    func play() async {
+    func play() {
         player?.play()
         isPlaying = true
         sessionStartTime = Date()
-        await AppLogger.shared.log("Playback started", level: .info)
+        AppLogger.shared.log("Playback started", level: .info)
     }
 
-    func pause() async {
+    func pause() {
         player?.pause()
         isPlaying = false
-        await AppLogger.shared.log("Playback paused", level: .info)
+        AppLogger.shared.log("Playback paused", level: .info)
 
         // Sync progress when pausing
-        await syncProgress()
+        Task {
+            await syncProgress()
+        }
     }
 
     func seek(to time: Double) {
@@ -282,7 +271,7 @@ class AudioPlayerService: ObservableObject {
                 timeListened: PlaybackSessionManager.shared.totalTimeListened
             )
         } catch {
-            await AppLogger.shared.log("Failed to sync progress: \(error.localizedDescription)", level: .error)
+            AppLogger.shared.log("Failed to sync progress: \(error.localizedDescription)", level: .error)
         }
     }
 }

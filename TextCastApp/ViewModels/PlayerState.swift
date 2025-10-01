@@ -26,10 +26,8 @@ class PlayerState: ObservableObject {
         audioPlayer.$didFinishPlaying
             .sink { [weak self] didFinish in
                 if didFinish {
-                    Task { @MainActor in
-                        await AppLogger.shared.log("Episode finished, playing next in queue", level: .info)
-                        self?.playNext()
-                    }
+                    AppLogger.shared.log("Episode finished, playing next in queue", level: .info)
+                    self?.playNext()
                 }
             }
             .store(in: &cancellables)
@@ -54,9 +52,7 @@ class PlayerState: ObservableObject {
     /// Play next item in queue
     func playNext() {
         guard currentQueueIndex < playQueue.count - 1 else {
-            Task {
-                await AppLogger.shared.log("End of queue reached", level: .info)
-            }
+            AppLogger.shared.log("End of queue reached", level: .info)
             return
         }
         currentQueueIndex += 1
@@ -66,9 +62,7 @@ class PlayerState: ObservableObject {
     /// Play previous item in queue
     func playPrevious() {
         guard currentQueueIndex > 0 else {
-            Task {
-                await AppLogger.shared.log("At start of queue", level: .info)
-            }
+            AppLogger.shared.log("At start of queue", level: .info)
             return
         }
         currentQueueIndex -= 1
@@ -89,28 +83,28 @@ class PlayerState: ObservableObject {
             if let apiClient,
                let streamURL = await apiClient.getStreamURL(itemId: item.id)
             {
-                await AppLogger.shared.log("Loading stream URL: \(streamURL)", level: .info)
-                await audioPlayer.load(url: streamURL)
+                AppLogger.shared.log("Loading stream URL: \(streamURL)", level: .info)
+                audioPlayer.load(url: streamURL)
 
                 // Wait for player to be ready
                 try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
 
                 // Resume from saved position if available
                 if item.currentTime > 0 {
-                    await AppLogger.shared.log("Resuming from saved position: \(item.currentTime)s", level: .info)
-                    await audioPlayer.seek(to: item.currentTime)
+                    AppLogger.shared.log("Resuming from saved position: \(item.currentTime)s", level: .info)
+                    audioPlayer.seek(to: item.currentTime)
                 }
 
                 // Auto-play
-                await audioPlayer.play()
+                audioPlayer.play()
 
                 // Update Now Playing Info for Control Center and Lock Screen
-                await audioPlayer.updateNowPlayingInfo(
+                audioPlayer.updateNowPlayingInfo(
                     title: item.title,
                     author: item.author
                 )
             } else {
-                await AppLogger.shared.log("Failed to get stream URL for item: \(item.id)", level: .error)
+                AppLogger.shared.log("Failed to get stream URL for item: \(item.id)", level: .error)
             }
         }
     }
@@ -124,9 +118,7 @@ class PlayerState: ObservableObject {
     }
 
     func stopPlayback() {
-        Task {
-            await audioPlayer.pause()
-        }
+        audioPlayer.pause()
         currentItem = nil
     }
 }
