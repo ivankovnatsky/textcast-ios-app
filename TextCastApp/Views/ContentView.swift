@@ -28,17 +28,17 @@ struct MainTabView: View {
                         Label("Latest", systemImage: "list.bullet")
                     }
 
+                SettingsView()
+                    .tabItem {
+                        Label("Settings", systemImage: "gear")
+                    }
+
                 if logger.isEnabled {
                     LogsView()
                         .tabItem {
                             Label("Logs", systemImage: "doc.text")
                         }
                 }
-
-                SettingsView()
-                    .tabItem {
-                        Label("Settings", systemImage: "gear")
-                    }
             }
 
             // Mini player floating above tab bar
