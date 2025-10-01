@@ -105,12 +105,21 @@ xcrun simctl launch <SIMULATOR_ID> com.cabotagealts.textcast
    - Select your iPhone from the device dropdown in Xcode
    - Xcode will automatically handle code signing with your Apple ID
 
-3. **Build and Install**:
+3. **Enable Background Audio Capability** (First time only):
+
+   - In Xcode, select the **TextCastApp** target
+   - Go to **Signing & Capabilities** tab
+   - Click **+ Capability** button
+   - Search for and add **Background Modes**
+   - Check the box for **Audio, AirPlay, and Picture in Picture**
+   - This allows audio to continue playing when the app is in the background
+
+4. **Build and Install**:
 
    - Press `Cmd+R` in Xcode
    - Xcode will build and install the app on your device
 
-4. **Trust Developer App Certificate on iPhone** (First time only):
+5. **Trust Developer App Certificate on iPhone** (First time only):
    - After installation, the app icon will appear on your home screen
    - Tapping it will show an **"Untrusted Developer"** alert
    - Open **Settings** on the device
