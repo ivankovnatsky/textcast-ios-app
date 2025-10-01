@@ -1,4 +1,4 @@
-.PHONY: build install launch run help clean
+.PHONY: build install launch run relaunch help clean
 
 # Configuration
 SCHEME = TextCastApp
@@ -30,6 +30,10 @@ launch: ## Launch the app on simulator
 
 run: build install launch ## Build, install, and launch the app
 	@echo "✓ App is running"
+
+relaunch: ## Relaunch already installed app (no rebuild)
+	@xcrun simctl terminate $(SIMULATOR_ID) $(BUNDLE_ID) 2>/dev/null || true
+	@xcrun simctl launch $(SIMULATOR_ID) $(BUNDLE_ID)
 
 clean: ## Clean build artifacts
 	@xcodebuild -scheme $(SCHEME) clean
