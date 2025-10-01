@@ -4,16 +4,14 @@ import SwiftUI
 struct NowPlayingBar: View {
     @ObservedObject var playerState: PlayerState
 
+    private var progress: Double {
+        guard playerState.audioPlayer.duration > 0 else { return 0 }
+        return playerState.audioPlayer.currentTime / playerState.audioPlayer.duration
+    }
+
     var body: some View {
         if let item = playerState.currentItem {
-            VStack(spacing: 0) {
-                // Progress bar
-                ProgressView(value: playerState.audioPlayer.currentTime, total: playerState.audioPlayer.duration)
-                    .progressViewStyle(.linear)
-                    .tint(.blue)
-                    .frame(height: 2)
-
-                HStack(spacing: 12) {
+            HStack(spacing: 12) {
                     // Cover art
                     AsyncImage(url: item.coverURL) { image in
                         image
@@ -75,13 +73,25 @@ struct NowPlayingBar: View {
                     .padding(.trailing, 8)
                 }
                 .padding(.vertical, 8)
-            }
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 32))
-            .shadow(color: .black.opacity(0.2), radius: 10, y: -2)
-            .onTapGesture {
-                playerState.expandPlayer()
-            }
+                .background(
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            // Base material
+                            RoundedRectangle(cornerRadius: 32)
+                                .fill(.ultraThinMaterial)
+
+                            // Darker tint for played portion (left side)
+                            RoundedRectangle(cornerRadius: 32)
+                                .fill(Color.black.opacity(0.15))
+                                .frame(width: geometry.size.width * progress)
+                        }
+                    }
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 32))
+                .shadow(color: .black.opacity(0.2), radius: 10, y: -2)
+                .onTapGesture {
+                    playerState.expandPlayer()
+                }
         }
     }
 }
