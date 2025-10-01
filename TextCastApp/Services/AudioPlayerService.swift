@@ -17,6 +17,8 @@ class AudioPlayerService: ObservableObject {
     private var progressSyncInterval: TimeInterval = 30 // Sync every 30 seconds
     private var sessionStartTime: Date = .init()
     private var apiClient: AudiobookshelfAPI?
+    private var nowPlayingTitle: String?
+    private var nowPlayingAuthor: String?
 
     func setAPIClient(_ client: AudiobookshelfAPI?) {
         apiClient = client
@@ -84,6 +86,10 @@ class AudioPlayerService: ObservableObject {
     }
 
     func updateNowPlayingInfo(title: String, author: String?, artwork: UIImage? = nil) {
+        // Store title and author for periodic updates
+        nowPlayingTitle = title
+        nowPlayingAuthor = author
+
         var nowPlayingInfo = [String: Any]()
         nowPlayingInfo[MPMediaItemPropertyTitle] = title
 
@@ -93,6 +99,23 @@ class AudioPlayerService: ObservableObject {
 
         if let artwork = artwork {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+        }
+
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
+
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+
+    private func updateNowPlayingTime() {
+        guard let title = nowPlayingTitle else { return }
+
+        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
+        nowPlayingInfo[MPMediaItemPropertyTitle] = title
+
+        if let author = nowPlayingAuthor {
+            nowPlayingInfo[MPMediaItemPropertyArtist] = author
         }
 
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
@@ -170,6 +193,9 @@ class AudioPlayerService: ObservableObject {
                 {
                     self?.duration = duration
                 }
+
+                // Update now playing info with current time
+                self?.updateNowPlayingTime()
 
                 // Sync progress periodically if playing
                 if let self, self.isPlaying {
