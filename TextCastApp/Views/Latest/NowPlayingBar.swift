@@ -74,7 +74,6 @@ struct NowPlayingBar: View {
                     }
                     .padding(.trailing, 8)
                 }
-                .padding(.horizontal, 12)
                 .padding(.vertical, 8)
             }
             .background(.ultraThinMaterial)

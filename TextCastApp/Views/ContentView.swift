@@ -48,7 +48,7 @@ struct MainTabView: View {
                 VStack {
                     Spacer()
                     NowPlayingBar(playerState: playerState)
-                        .padding(.horizontal, 8)
+                        .padding(.horizontal, 20)
                         .padding(.bottom, 90)
                 }
                 .ignoresSafeArea()
