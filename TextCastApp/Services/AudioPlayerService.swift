@@ -1,6 +1,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import MediaPlayer
 
 @MainActor
 class AudioPlayerService: ObservableObject {
@@ -23,6 +24,7 @@ class AudioPlayerService: ObservableObject {
 
     init() {
         setupAudioSession()
+        setupRemoteCommands()
     }
 
     deinit {
@@ -41,6 +43,63 @@ class AudioPlayerService: ObservableObject {
                 await AppLogger.shared.log("Failed to set up audio session: \(error)", level: .error)
             }
         }
+    }
+
+    private func setupRemoteCommands() {
+        let commandCenter = MPRemoteCommandCenter.shared()
+
+        // Play command
+        commandCenter.playCommand.addTarget { [weak self] _ in
+            Task { @MainActor in
+                await self?.play()
+            }
+            return .success
+        }
+
+        // Pause command
+        commandCenter.pauseCommand.addTarget { [weak self] _ in
+            Task { @MainActor in
+                await self?.pause()
+            }
+            return .success
+        }
+
+        // Skip forward
+        commandCenter.skipForwardCommand.preferredIntervals = [15]
+        commandCenter.skipForwardCommand.addTarget { [weak self] _ in
+            Task { @MainActor in
+                await self?.skipForward()
+            }
+            return .success
+        }
+
+        // Skip backward
+        commandCenter.skipBackwardCommand.preferredIntervals = [15]
+        commandCenter.skipBackwardCommand.addTarget { [weak self] _ in
+            Task { @MainActor in
+                await self?.skipBackward()
+            }
+            return .success
+        }
+    }
+
+    func updateNowPlayingInfo(title: String, author: String?, artwork: UIImage? = nil) {
+        var nowPlayingInfo = [String: Any]()
+        nowPlayingInfo[MPMediaItemPropertyTitle] = title
+
+        if let author = author {
+            nowPlayingInfo[MPMediaItemPropertyArtist] = author
+        }
+
+        if let artwork = artwork {
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+        }
+
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
+
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 
     func load(url: URL) async {

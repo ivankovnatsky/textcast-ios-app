@@ -103,6 +103,12 @@ class PlayerState: ObservableObject {
 
                 // Auto-play
                 await audioPlayer.play()
+
+                // Update Now Playing Info for Control Center and Lock Screen
+                await audioPlayer.updateNowPlayingInfo(
+                    title: item.title,
+                    author: item.author
+                )
             } else {
                 await AppLogger.shared.log("Failed to get stream URL for item: \(item.id)", level: .error)
             }
