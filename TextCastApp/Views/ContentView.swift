@@ -54,15 +54,13 @@ struct MainTabView: View {
                 .ignoresSafeArea()
             }
 
-            // Full-screen player overlay
-            if playerState.isPlayerExpanded {
-                PlayerView(playerState: playerState)
-                    .environmentObject(authState)
-                    .transition(.move(edge: .bottom))
-            }
         }
-        .animation(.easeInOut, value: playerState.isPlayerExpanded)
-        .animation(.easeInOut, value: playerState.currentItem != nil)
+        .fullScreenCover(isPresented: $playerState.isPlayerExpanded) {
+            PlayerView(playerState: playerState)
+                .environmentObject(authState)
+                .presentationBackground(.clear)
+                .presentationDragIndicator(.hidden)
+        }
     }
 }
 
