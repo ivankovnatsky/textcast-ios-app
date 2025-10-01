@@ -72,50 +72,56 @@ struct PlayerView: View {
                         }
 
                         // Main controls
-                        HStack(spacing: 40) {
-                            // Previous track
-                            Button {
-                                playerState.playPrevious()
-                            } label: {
-                                Image(systemName: "backward.end.fill")
-                                    .font(.title)
-                            }
-                            .disabled(playerState.currentQueueIndex == 0)
-                            .opacity(playerState.currentQueueIndex == 0 ? 0.3 : 1.0)
+                        VStack(spacing: 32) {
+                            // Primary controls (top row)
+                            HStack(spacing: 40) {
+                                // Skip backward
+                                Button {
+                                    audioPlayer.skipBackward()
+                                } label: {
+                                    Image(systemName: "gobackward.15")
+                                        .font(.title)
+                                }
 
-                            // Skip backward
-                            Button {
-                                audioPlayer.skipBackward()
-                            } label: {
-                                Image(systemName: "gobackward.15")
-                                    .font(.title)
-                            }
+                                // Play/Pause
+                                Button {
+                                    audioPlayer.togglePlayPause()
+                                } label: {
+                                    Image(systemName: audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                        .font(.system(size: 64))
+                                }
 
-                            // Play/Pause
-                            Button {
-                                audioPlayer.togglePlayPause()
-                            } label: {
-                                Image(systemName: audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                                    .font(.system(size: 64))
-                            }
-
-                            // Skip forward
-                            Button {
-                                audioPlayer.skipForward()
-                            } label: {
-                                Image(systemName: "goforward.15")
-                                    .font(.title)
+                                // Skip forward
+                                Button {
+                                    audioPlayer.skipForward()
+                                } label: {
+                                    Image(systemName: "goforward.15")
+                                        .font(.title)
+                                }
                             }
 
-                            // Next track
-                            Button {
-                                playerState.playNext()
-                            } label: {
-                                Image(systemName: "forward.end.fill")
-                                    .font(.title)
+                            // Episode navigation (bottom row)
+                            HStack(spacing: 80) {
+                                // Previous episode
+                                Button {
+                                    playerState.playPrevious()
+                                } label: {
+                                    Image(systemName: "backward.end.fill")
+                                        .font(.title)
+                                }
+                                .disabled(playerState.currentQueueIndex == 0)
+                                .opacity(playerState.currentQueueIndex == 0 ? 0.3 : 1.0)
+
+                                // Next episode
+                                Button {
+                                    playerState.playNext()
+                                } label: {
+                                    Image(systemName: "forward.end.fill")
+                                        .font(.title)
+                                }
+                                .disabled(playerState.currentQueueIndex >= playerState.playQueue.count - 1)
+                                .opacity(playerState.currentQueueIndex >= playerState.playQueue.count - 1 ? 0.3 : 1.0)
                             }
-                            .disabled(playerState.currentQueueIndex >= playerState.playQueue.count - 1)
-                            .opacity(playerState.currentQueueIndex >= playerState.playQueue.count - 1 ? 0.3 : 1.0)
                         }
                         .foregroundStyle(.primary)
                     }
