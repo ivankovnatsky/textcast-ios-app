@@ -28,8 +28,8 @@ cd /Users/ivan/Sources/github.com/ivankovnatsky/textcast-ios-app
 # Initialize git if not already done
 git init
 
-# Create private GitHub repository
-gh repo create ivankovnatsky/textcast-ios-app --private --source=. --remote=origin
+# Create public GitHub repository
+gh repo create ivankovnatsky/textcast-ios-app --public --source=. --remote=origin
 
 # Set default branch to main
 gh repo edit --default-branch main
