@@ -67,6 +67,8 @@ make launch
 make run
 ```
 
+**Note:** Build must be run in a clean environment, not under nix-shell. If using direnv, run `direnv deny` first.
+
 #### Using Xcode GUI
 
 1. Open `TextCastApp.xcodeproj` in Xcode
