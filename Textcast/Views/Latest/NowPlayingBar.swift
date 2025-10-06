@@ -49,7 +49,7 @@ struct NowPlayingBar: View {
                             .font(.title2)
                             .foregroundStyle(.primary)
                     }
-                    .padding(.trailing, 8)
+                    .padding(.trailing, 32)
                 }
                 .padding(.vertical, 8)
                 .background(
