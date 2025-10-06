@@ -8,7 +8,7 @@ BUNDLE_ID = com.cabotagealts.textcast
 
 # Dynamically find simulator ID and app path
 SIMULATOR_ID = $(shell xcrun simctl list devices | grep "$(DEVICE_NAME)" | grep -v "unavailable" | head -1 | grep -o '[A-F0-9\-]\{36\}')
-APP_PATH = $(shell find $(HOME)/Library/Developer/Xcode/DerivedData -name "Textcast.app" -path "*/Debug-iphonesimulator/*" 2>/dev/null | head -1)
+APP_PATH = $(shell find $(HOME)/Library/Developer/Xcode/DerivedData -name "Textcast.app" -path "*/Build/Products/Debug-iphonesimulator/*" 2>/dev/null | head -1)
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
