@@ -1,4 +1,4 @@
-.PHONY: build install launch run relaunch help clean
+.PHONY: build install launch run relaunch help clean watch
 
 # Configuration
 SCHEME = Textcast
@@ -42,6 +42,16 @@ relaunch: build install ## Rebuild, install, and relaunch the app
 clean: ## Clean build artifacts
 	@xcodebuild -project Textcast.xcodeproj -scheme $(SCHEME) clean
 	@echo "✓ Build artifacts cleaned"
+
+watch: ## Watch for file changes and auto-rebuild
+	while true; do \
+		watchman-make \
+			--pattern \
+				'Textcast/**/*.swift' \
+			--target relaunch; \
+		echo "watchman-make exited, restarting..."; \
+		sleep 1; \
+	done
 
 # Default target
 .DEFAULT_GOAL := help
