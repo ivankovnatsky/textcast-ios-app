@@ -6,9 +6,10 @@ DEVICE_NAME = iPhone 17 Pro Max
 DESTINATION = 'platform=iOS Simulator,name=$(DEVICE_NAME)'
 BUNDLE_ID = com.cabotagealts.textcast
 
-# Dynamically find simulator ID and app path
+# Dynamically find simulator ID
 SIMULATOR_ID = $(shell xcrun simctl list devices | grep "$(DEVICE_NAME)" | grep -v "unavailable" | head -1 | grep -o '[A-F0-9\-]\{36\}')
-APP_PATH = $(shell find $(HOME)/Library/Developer/Xcode/DerivedData -name "Textcast.app" -path "*/Build/Products/Debug-iphonesimulator/*" 2>/dev/null | head -1)
+# Use xcodebuild to get the actual build path
+APP_PATH = $(shell xcodebuild -project Textcast.xcodeproj -scheme $(SCHEME) -destination $(DESTINATION) -showBuildSettings 2>/dev/null | grep "^\s*BUILT_PRODUCTS_DIR" | sed 's/.*= //')/$(SCHEME).app
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
