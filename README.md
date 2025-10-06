@@ -15,6 +15,10 @@ version features only two tabs:
 
 ## Requirements
 
+- **iOS 26.0+** (for Liquid Glass design language support)
+- **Xcode 17+** with Swift 6
+- **Audiobookshelf server** instance
+
 ## Getting Started
 
 ### 1. Create GitHub Repository (First Time Setup)

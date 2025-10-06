@@ -40,6 +40,7 @@ struct MainTabView: View {
                         }
                 }
             }
+            .toolbarBackground(.clear, for: .tabBar)
 
             // Mini player floating above tab bar
             // FIXME: Hardcoded padding value - find better way to dynamically position above tab bar

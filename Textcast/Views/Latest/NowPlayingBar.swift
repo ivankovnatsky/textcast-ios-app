@@ -70,10 +70,8 @@ struct NowPlayingBar: View {
                     .padding(.trailing, 32)
                 }
                 .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 32)
-                        .fill(.ultraThinMaterial)
-                )
+                .glassEffect(.regular.interactive())
+                .clipShape(RoundedRectangle(cornerRadius: 32))
                 .shadow(color: .black.opacity(0.2), radius: 10, y: -2)
                 .onTapGesture {
                     playerState.expandPlayer()
