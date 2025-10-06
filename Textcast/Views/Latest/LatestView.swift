@@ -26,18 +26,13 @@ struct LatestView: View {
                         ForEach(Array(viewModel.items.enumerated()), id: \.element.id) { index, item in
                             QueueItemRow(item: item)
                                 .onTapGesture {
-                                    if index == 0 {
-                                        // Top item (newest) - play single episode only
-                                        playerState.play(item: item, apiClient: authState.getAPIClient())
-                                    } else {
-                                        // Other items - queue from this point DOWN to bottom (towards older episodes)
-                                        let queueItems = Array(viewModel.items[index...])
-                                        playerState.playQueue(
-                                            items: queueItems,
-                                            startingAt: 0,
-                                            apiClient: authState.getAPIClient()
-                                        )
-                                    }
+                                    // Always queue from tapped item to bottom (oldest)
+                                    let queueItems = Array(viewModel.items[index...])
+                                    playerState.playQueue(
+                                        items: queueItems,
+                                        startingAt: 0,
+                                        apiClient: authState.getAPIClient()
+                                    )
                                     playerState.expandPlayer()
                                 }
                                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -49,16 +44,13 @@ struct LatestView: View {
                                 }
                                 .contextMenu {
                                     Button {
-                                        if index == 0 {
-                                            playerState.play(item: item, apiClient: authState.getAPIClient())
-                                        } else {
-                                            let queueItems = Array(viewModel.items[index...])
-                                            playerState.playQueue(
-                                                items: queueItems,
-                                                startingAt: 0,
-                                                apiClient: authState.getAPIClient()
-                                            )
-                                        }
+                                        // Always queue from tapped item to bottom (oldest)
+                                        let queueItems = Array(viewModel.items[index...])
+                                        playerState.playQueue(
+                                            items: queueItems,
+                                            startingAt: 0,
+                                            apiClient: authState.getAPIClient()
+                                        )
                                         playerState.expandPlayer()
                                     } label: {
                                         Label("Play", systemImage: "play.fill")
