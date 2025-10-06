@@ -25,7 +25,7 @@ struct NowPlayingBar: View {
                     .cornerRadius(8)
                     .padding(.leading, 20)
 
-                    // Title and author
+                    // Title, author, and progress
                     VStack(alignment: .leading, spacing: 2) {
                         Text(item.title)
                             .font(.subheadline)
@@ -38,6 +38,23 @@ struct NowPlayingBar: View {
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         }
+
+                        // Progress bar
+                        GeometryReader { geometry in
+                            ZStack(alignment: .leading) {
+                                // Background track
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(height: 3)
+
+                                // Progress fill
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(Color.accentColor)
+                                    .frame(width: geometry.size.width * progress, height: 3)
+                            }
+                        }
+                        .frame(height: 3)
+                        .padding(.top, 2)
                     }
 
                     Spacer()
@@ -54,19 +71,8 @@ struct NowPlayingBar: View {
                 }
                 .padding(.vertical, 8)
                 .background(
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            // Base material
-                            RoundedRectangle(cornerRadius: 32)
-                                .fill(.ultraThinMaterial)
-
-                            // Darker tint for played portion (left side)
-                            Rectangle()
-                                .fill(Color.black.opacity(0.15))
-                                .frame(width: geometry.size.width * progress)
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 32))
-                    }
+                    RoundedRectangle(cornerRadius: 32)
+                        .fill(.ultraThinMaterial)
                 )
                 .shadow(color: .black.opacity(0.2), radius: 10, y: -2)
                 .onTapGesture {
