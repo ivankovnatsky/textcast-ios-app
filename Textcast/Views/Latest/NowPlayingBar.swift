@@ -23,6 +23,7 @@ struct NowPlayingBar: View {
                     }
                     .frame(width: 50, height: 50)
                     .cornerRadius(8)
+                    .padding(.leading, 20)
 
                     // Title and author
                     VStack(alignment: .leading, spacing: 2) {
