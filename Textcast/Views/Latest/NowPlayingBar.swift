@@ -61,13 +61,13 @@ struct NowPlayingBar: View {
                                 .fill(.ultraThinMaterial)
 
                             // Darker tint for played portion (left side)
-                            RoundedRectangle(cornerRadius: 32)
+                            Rectangle()
                                 .fill(Color.black.opacity(0.15))
                                 .frame(width: geometry.size.width * progress)
                         }
+                        .clipShape(RoundedRectangle(cornerRadius: 32))
                     }
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 32))
                 .shadow(color: .black.opacity(0.2), radius: 10, y: -2)
                 .onTapGesture {
                     playerState.expandPlayer()
