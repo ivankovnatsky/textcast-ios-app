@@ -41,34 +41,13 @@ struct NowPlayingBar: View {
 
                     Spacer()
 
-                    // Playback controls
-                    HStack(spacing: 20) {
-                        // Skip backward
-                        Button {
-                            playerState.audioPlayer.skipBackward()
-                        } label: {
-                            Image(systemName: "gobackward.15")
-                                .font(.title3)
-                                .foregroundStyle(.primary)
-                        }
-
-                        // Play/Pause button
-                        Button {
-                            playerState.audioPlayer.togglePlayPause()
-                        } label: {
-                            Image(systemName: playerState.audioPlayer.isPlaying ? "pause.fill" : "play.fill")
-                                .font(.title2)
-                                .foregroundStyle(.primary)
-                        }
-
-                        // Skip forward
-                        Button {
-                            playerState.audioPlayer.skipForward()
-                        } label: {
-                            Image(systemName: "goforward.15")
-                                .font(.title3)
-                                .foregroundStyle(.primary)
-                        }
+                    // Play/Pause button
+                    Button {
+                        playerState.audioPlayer.togglePlayPause()
+                    } label: {
+                        Image(systemName: playerState.audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                            .font(.title2)
+                            .foregroundStyle(.primary)
                     }
                     .padding(.trailing, 8)
                 }
