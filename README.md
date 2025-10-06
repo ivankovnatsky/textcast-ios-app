@@ -1,4 +1,4 @@
-# TextCast iOS App
+# Textcast iOS App
 
 A minimal, simple iOS client for
 [Audiobookshelf](https://www.audiobookshelf.org/) servers, designed to play
@@ -41,7 +41,7 @@ Open the existing Xcode project:
 
 ```bash
 cd /Users/ivan/Sources/github.com/ivankovnatsky/textcast-ios-app
-open TextCastApp.xcodeproj
+open Textcast.xcodeproj
 ```
 
 ### 3. Build and Run
@@ -71,7 +71,7 @@ make run
 
 #### Using Xcode GUI
 
-1. Open `TextCastApp.xcodeproj` in Xcode
+1. Open `Textcast.xcodeproj` in Xcode
 2. Select an iOS simulator (iOS 18+) from the device dropdown
 3. Press `Cmd+R` to build and run
 
@@ -79,7 +79,7 @@ make run
 
 ```bash
 # Build for iOS Simulator
-xcodebuild -scheme TextCastApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' build
+xcodebuild -scheme Textcast -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' build
 
 # Install to simulator
 xcrun simctl install <SIMULATOR_ID> <APP_PATH>
@@ -107,7 +107,7 @@ xcrun simctl launch <SIMULATOR_ID> com.cabotagealts.textcast
 
 3. **Enable Background Audio Capability** (First time only):
 
-   - In Xcode, select the **TextCastApp** target
+   - In Xcode, select the **Textcast** target
    - Go to **Signing & Capabilities** tab
    - Click **+ Capability** button
    - Search for and add **Background Modes**
@@ -183,7 +183,7 @@ The app will automatically save your credentials for future launches.
 
 The app uses a simple play button icon with 6 variants for different iOS appearance modes:
 
-![App Icon](TextCastApp/Assets.xcassets/AppIcon.appiconset/Default-iOS-Default-1024x1024@1x.png)
+![App Icon](Textcast/Assets.xcassets/AppIcon.appiconset/Default-iOS-Default-1024x1024@1x.png)
 
 ### Icon Creation Process
 
@@ -196,7 +196,7 @@ The current app icon was created as follows:
    - Generated all 6 iOS variants under Icons/IconComposer
 
 3. **Added to Xcode**:
-   - Opened `TextCastApp.xcodeproj` in Xcode
+   - Opened `Textcast.xcodeproj` in Xcode
    - Navigated to `Assets.xcassets` → `AppIcon`
    - Dragged and dropped the exported PNG files, used only default, dark, tinted
 
@@ -267,9 +267,9 @@ This app uses the [Audiobookshelf API](https://api.audiobookshelf.org/). Current
 ### File Structure
 
 ```
-TextCastApp/
+Textcast/
 ├── App/
-│   └── TextCastApp.swift              # Main app, AuthenticationState, login flow
+│   └── Textcast.swift              # Main app, AuthenticationState, login flow
 ├── Views/
 │   ├── ContentView.swift              # Root view with tabs
 │   ├── Latest/

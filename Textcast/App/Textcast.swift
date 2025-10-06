@@ -2,7 +2,7 @@ import Combine
 import SwiftUI
 
 @main
-struct TextCastApp: App {
+struct Textcast: App {
     @StateObject private var authState = AuthenticationState()
 
     var body: some Scene {

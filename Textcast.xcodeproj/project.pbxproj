@@ -7,26 +7,26 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		2C42E7072E8BE37800EFA318 /* TextCastApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TextCastApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C42E7072E8BE37800EFA318 /* Textcast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Textcast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		2C71702F2E8D646400548005 /* Exceptions for "TextCastApp" folder in "TextCastApp" target */ = {
+		2C71702F2E8D646400548005 /* Exceptions for "Textcast" folder in "Textcast" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 2C42E7062E8BE37800EFA318 /* TextCastApp */;
+			target = 2C42E7062E8BE37800EFA318 /* Textcast */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		2C42E7092E8BE37800EFA318 /* TextCastApp */ = {
+		2C42E7092E8BE37800EFA318 /* Textcast */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				2C71702F2E8D646400548005 /* Exceptions for "TextCastApp" folder in "TextCastApp" target */,
+				2C71702F2E8D646400548005 /* Exceptions for "Textcast" folder in "Textcast" target */,
 			);
-			path = TextCastApp;
+			path = Textcast;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -45,7 +45,7 @@
 		2C42E6FE2E8BE37800EFA318 = {
 			isa = PBXGroup;
 			children = (
-				2C42E7092E8BE37800EFA318 /* TextCastApp */,
+				2C42E7092E8BE37800EFA318 /* Textcast */,
 				2C42E7082E8BE37800EFA318 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -53,7 +53,7 @@
 		2C42E7082E8BE37800EFA318 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2C42E7072E8BE37800EFA318 /* TextCastApp.app */,
+				2C42E7072E8BE37800EFA318 /* Textcast.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,9 +61,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2C42E7062E8BE37800EFA318 /* TextCastApp */ = {
+		2C42E7062E8BE37800EFA318 /* Textcast */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2C42E7122E8BE37900EFA318 /* Build configuration list for PBXNativeTarget "TextCastApp" */;
+			buildConfigurationList = 2C42E7122E8BE37900EFA318 /* Build configuration list for PBXNativeTarget "Textcast" */;
 			buildPhases = (
 				2C42E7032E8BE37800EFA318 /* Sources */,
 				2C42E7042E8BE37800EFA318 /* Frameworks */,
@@ -74,13 +74,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				2C42E7092E8BE37800EFA318 /* TextCastApp */,
+				2C42E7092E8BE37800EFA318 /* Textcast */,
 			);
-			name = TextCastApp;
+			name = Textcast;
 			packageProductDependencies = (
 			);
-			productName = TextCastApp;
-			productReference = 2C42E7072E8BE37800EFA318 /* TextCastApp.app */;
+			productName = Textcast;
+			productReference = 2C42E7072E8BE37800EFA318 /* Textcast.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -98,7 +98,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2C42E7022E8BE37800EFA318 /* Build configuration list for PBXProject "TextCastApp" */;
+			buildConfigurationList = 2C42E7022E8BE37800EFA318 /* Build configuration list for PBXProject "Textcast" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -112,7 +112,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2C42E7062E8BE37800EFA318 /* TextCastApp */,
+				2C42E7062E8BE37800EFA318 /* Textcast */,
 			);
 		};
 /* End PBXProject section */
@@ -269,7 +269,7 @@
 				DEVELOPMENT_TEAM = BRJ2LCSSH8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TextCastApp/Info.plist;
+				INFOPLIST_FILE = Textcast/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -302,7 +302,7 @@
 				DEVELOPMENT_TEAM = BRJ2LCSSH8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TextCastApp/Info.plist;
+				INFOPLIST_FILE = Textcast/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -328,7 +328,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2C42E7022E8BE37800EFA318 /* Build configuration list for PBXProject "TextCastApp" */ = {
+		2C42E7022E8BE37800EFA318 /* Build configuration list for PBXProject "Textcast" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2C42E7102E8BE37900EFA318 /* Debug */,
@@ -337,7 +337,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2C42E7122E8BE37900EFA318 /* Build configuration list for PBXNativeTarget "TextCastApp" */ = {
+		2C42E7122E8BE37900EFA318 /* Build configuration list for PBXNativeTarget "Textcast" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2C42E7132E8BE37900EFA318 /* Debug */,
