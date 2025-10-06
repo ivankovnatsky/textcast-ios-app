@@ -31,6 +31,7 @@ launch: ## Launch the app on simulator
 	@xcrun simctl launch $(SIMULATOR_ID) $(BUNDLE_ID)
 
 run: build install launch ## Build, install, and launch the app
+	@open -a Simulator
 	@echo "✓ App is running"
 
 relaunch: build install ## Rebuild, install, and relaunch the app
