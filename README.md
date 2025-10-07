@@ -151,8 +151,16 @@ The app will automatically save your credentials for future launches.
 ### Latest Tab
 
 - Display recent podcast episodes from your Audiobookshelf server
-- **Tap episode** to open full-screen player and start playback
+- **Episode rows** show:
+  - Cover art, title, and author
+  - Play/pause button with time remaining (e.g., "45m" or "2h 15m")
+- **Tap play button** to start playback or pause/resume current episode
+- **Tap episode row** to open full-screen player and start playback
 - **Pull to refresh** to reload latest episodes
+- **Swipe to delete** or use context menu for episode actions:
+  - Mark as Finished
+  - Restart Progress
+  - Delete from Library
 
 ### Player View
 
