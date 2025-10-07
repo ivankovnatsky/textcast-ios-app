@@ -9,21 +9,19 @@ struct QueueItem: Identifiable, Hashable {
     let currentTime: TimeInterval // in seconds
     let totalDuration: TimeInterval // in seconds
 
-    var progressText: String {
-        let current = formatDuration(currentTime)
-        let total = formatDuration(totalDuration)
-        let percentage = Int(progress * 100)
-        return "\(current) / \(total) (\(percentage)%)"
+    var minutesRemaining: Int {
+        let remaining = totalDuration - currentTime
+        return max(0, Int(remaining) / 60)
     }
 
-    private func formatDuration(_ seconds: TimeInterval) -> String {
-        let hours = Int(seconds) / 3600
-        let minutes = Int(seconds) / 60 % 60
-
-        if hours > 0 {
-            return "\(hours)h \(minutes)m"
-        } else {
+    var minutesRemainingText: String {
+        let minutes = minutesRemaining
+        if minutes < 60 {
             return "\(minutes)m"
+        } else {
+            let hours = minutes / 60
+            let mins = minutes % 60
+            return "\(hours)h \(mins)m"
         }
     }
 }

@@ -24,7 +24,9 @@ struct LatestView: View {
                 } else {
                     List {
                         ForEach(Array(viewModel.items.enumerated()), id: \.element.id) { index, item in
-                            QueueItemRow(item: item)
+                            QueueItemRow(item: item, index: index)
+                                .environment(\.queueItems, viewModel.items)
+                                .environment(\.apiClient, authState.getAPIClient())
                                 .onTapGesture {
                                     // Always queue from tapped item to bottom (oldest)
                                     let queueItems = Array(viewModel.items[index...])
@@ -113,12 +115,38 @@ struct LatestView: View {
 
 // MARK: - Queue Item Row
 
+// MARK: - Environment Keys
+
+private struct QueueItemsKey: EnvironmentKey {
+    static let defaultValue: [QueueItem] = []
+}
+
+private struct APIClientKey: EnvironmentKey {
+    static let defaultValue: AudiobookshelfAPI? = nil
+}
+
+extension EnvironmentValues {
+    var queueItems: [QueueItem] {
+        get { self[QueueItemsKey.self] }
+        set { self[QueueItemsKey.self] = newValue }
+    }
+
+    var apiClient: AudiobookshelfAPI? {
+        get { self[APIClientKey.self] }
+        set { self[APIClientKey.self] = newValue }
+    }
+}
+
 struct QueueItemRow: View {
     let item: QueueItem
+    let index: Int
+    @EnvironmentObject var playerState: PlayerState
+    @Environment(\.queueItems) private var queueItems
+    @Environment(\.apiClient) private var apiClient
 
     var body: some View {
         HStack(spacing: 12) {
-            // Cover art placeholder
+            // Cover art
             AsyncImage(url: item.coverURL) { image in
                 image
                     .resizable()
@@ -130,7 +158,7 @@ struct QueueItemRow: View {
             .frame(width: 60, height: 60)
             .cornerRadius(8)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(item.title)
                     .font(.headline)
                     .lineLimit(2)
@@ -142,26 +170,61 @@ struct QueueItemRow: View {
                         .lineLimit(1)
                 }
 
-                // Progress bar
-                ProgressView(value: item.progress)
-                    .tint(.blue)
-
-                Text(item.progressText)
-                    .font(.caption)
+                // Play/pause button with minutes remaining
+                Button {
+                    if isCurrentlyPlaying {
+                        // Toggle playback for currently playing item
+                        if playerState.audioPlayer.isPlaying {
+                            playerState.audioPlayer.pause()
+                        } else {
+                            playerState.audioPlayer.play()
+                        }
+                    } else {
+                        // Start playing this item
+                        let queueFromHere = Array(queueItems[index...])
+                        playerState.playQueue(
+                            items: queueFromHere,
+                            startingAt: 0,
+                            apiClient: apiClient
+                        )
+                        playerState.expandPlayer()
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: isCurrentlyPlaying ? "pause.fill" : "play.fill")
+                            .font(.caption)
+                        Text(item.minutesRemainingText)
+                            .font(.caption)
+                    }
                     .foregroundStyle(.secondary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.gray.opacity(0.2))
+                    .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
             }
+
+            Spacer()
         }
         .padding(.vertical, 4)
+    }
+
+    private var isCurrentlyPlaying: Bool {
+        playerState.currentItem?.id == item.id && playerState.audioPlayer.isPlaying
     }
 }
 
 #Preview("Latest View") {
     LatestView()
+        .environmentObject(AuthenticationState())
+        .environmentObject(PlayerState())
 }
 
 #Preview("Latest Item Row") {
     List {
-        QueueItemRow(item: QueueItem.preview)
-        QueueItemRow(item: QueueItem.preview2)
+        QueueItemRow(item: QueueItem.preview, index: 0)
+        QueueItemRow(item: QueueItem.preview2, index: 1)
     }
+    .environmentObject(PlayerState())
 }
